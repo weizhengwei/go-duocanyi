@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"log"
+	"io"
 	"io/ioutil"
-	"strings"
+	_"strings"
 	"net/url"
 	"encoding/json"
+	"os"
 )
 
 const BIND_ADDR = ":9090"
@@ -47,12 +49,12 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		fmt.Println(string(body))
-		ss := strings.Replace(string(body), "%7B", "{", -1)
-		ss = strings.Replace(ss, "%7D", "}", -1)
-		ss = strings.Replace(ss, "%3A", ":", -1)
-		ss = strings.Replace(ss, "%2C", ",", -1)
-		ss = strings.Replace(ss, "%22", "", -1)
-		fmt.Println(ss)
+		// ss := strings.Replace(string(body), "%7B", "{", -1)
+		// ss = strings.Replace(ss, "%7D", "}", -1)
+		// ss = strings.Replace(ss, "%3A", ":", -1)
+		// ss = strings.Replace(ss, "%2C", ",", -1)
+		// ss = strings.Replace(ss, "%22", "", -1)
+		// fmt.Println(ss)
 		resUri, pErr := url.QueryUnescape(string(body))
 	    if pErr != nil {
 	    	fmt.Println(pErr)
@@ -83,9 +85,74 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+//curl -F "file=@register_device.bat" localhost:9090/upload -v
+func Upload(res http.ResponseWriter, req *http.Request) {
+	req.ParseMultipartForm(32 << 20)
+	file, handler, err := req.FormFile("file")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+	io.Copy(f, file)
+	fmt.Fprintf(res, "upload ok")
+	DealOrgName()
+}
+
+
+type RetItem struct {
+	RET_CODE string
+	SERVICE_CODE string
+	RET_MSG string
+}
+
+type SysHead struct {
+	RET []RetItem
+	RES_STATUS string
+}
+
+type Result struct {
+	SYS_HEAD SysHead
+	BODY interface{}
+}
+
+func TestRet(res http.ResponseWriter, req *http.Request) {
+	retitem := RetItem{RET_CODE: "100100", SERVICE_CODE: "serviercode", RET_MSG: "ret msg"}
+	syshead := SysHead{}
+	syshead.RET = append(syshead.RET, retitem)
+	syshead.RES_STATUS = "status"
+	var ret Result
+	ret.SYS_HEAD = syshead
+	str, err := json.Marshal(&ret)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(str))
+}
+
 func main() {
+	database := CustomDB{}
+	err := database.Init()
+	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	http.HandleFunc("/", Home)
 	http.HandleFunc("/serviceProxy/servlet/", AllServlet)
+	http.HandleFunc("/upload", Upload)
+	http.HandleFunc("/testret", TestRet)
+	fs := http.FileServer(http.Dir("."))
+	http.Handle("/test", http.StripPrefix("/test/", fs))
 	fmt.Println("server listen at", BIND_ADDR)
 	log.Fatal(http.ListenAndServe(BIND_ADDR, nil))
 }
