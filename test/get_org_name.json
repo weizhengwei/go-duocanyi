@@ -1,0 +1,9 @@
+json=
+{
+	"SERVICE_CODE":"bull.CloudPlatInterface.Get_tb_admindivision_cascade_select",
+	"ORG_CODE":"2015122501",
+	"pageNumber": 0,
+	"pageSize": 10,
+	"esblover": false,
+	"CONSUMER_ID":"bbeeb31c1e7542a793203cc3bc376840"
+}
