@@ -18,3 +18,4 @@ type Result struct {
 	SYS_HEAD SysHead
 	BODY interface{}
 }
+
