@@ -94,7 +94,7 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_archives_CRUD":// 上传健康档案
 
 	    case "bull.ResourcesHZ.SNY_yh_union_CRUD"://uploadCheckups
-
+	    	UploadCheckups(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_mpi_person_jkbg":// 上传健康报告
 
 	    case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件

@@ -30,4 +30,13 @@ func DealRegister(s string, db *sql.DB) {
 		return
 	}
 	fmt.Println(registerjson)
+
+	var ID, AREA_CODE string
+	err = db.QueryRow("select ID$ as OID,AREA_CODE from tb_organization where ORG_CODE=? and ORG_NAME=?", 
+		registerjson.Data.ORG_CODE, registerjson.Data.ORG_NAME).Scan(&ID, &AREA_CODE)
+	if err != nil {//机构代码和名称不存在
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(ID, AREA_CODE)
 }
