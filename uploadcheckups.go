@@ -10,7 +10,7 @@ import (
 //血氧脉搏数据
 type SPOItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -27,7 +27,7 @@ type SPOItem struct {
 //血压数据
 type NIBPItem struct{
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -46,7 +46,7 @@ type NIBPItem struct{
 //体温数据
 type TemperatureItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -62,7 +62,7 @@ type TemperatureItem struct {
 //血糖数据
 type GluItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -78,7 +78,7 @@ type GluItem struct {
 //尿常规数据
 type UrineItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -103,7 +103,7 @@ type UrineItem struct {
 
 type BmiItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -122,7 +122,7 @@ type BmiItem struct {
 //尿酸
 type UaItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -138,7 +138,7 @@ type UaItem struct {
 //胆固醇
 type CholItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -154,7 +154,7 @@ type CholItem struct {
 //血红蛋白
 type BfItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -172,7 +172,7 @@ type BfItem struct {
 
 type KJItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -189,7 +189,7 @@ type KJItem struct {
 
 type HbA1cItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -205,7 +205,7 @@ type HbA1cItem struct {
 
 type HbItem struct {
 	PID string
-	type int
+	Type int
 	YHBM string
 	YHMC string
 	YSBM string
@@ -219,16 +219,16 @@ type HbItem struct {
 	ORG_NAME string
 }
 
-// System.out.println("map.getData===" + map.get("data"));// 心电=1
-// System.out.println("map.getData===" + map.get("xymbdata"));// 血氧脉搏=2
-// System.out.println("map.getData===" + map.get("xydata"));// 血压=3
-// System.out.println("map.getData===" + map.get("twdata"));// 体温=4
-// System.out.println("map.getData===" + map.get("xtdata"));// 血糖=5
-// System.out.println("map.getData===" + map.get("nydata"));// 尿常规=6
-// System.out.println("map.getData===" + map.get("bmidata"));// BMI=7
-// System.out.println("map.getData===" + map.get("nsdata"));// 尿酸=8
-// System.out.println("map.getData===" + map.get("dgcdata"));// 胆固醇=9
-// System.out.println("map.getData===" + map.get("xhdbdata"));// 血红蛋白=10
+// System.out.print8ln("map.getData===" + map.get("data"));// 心电=1
+// System.out.print8ln("map.getData===" + map.get("xymbdata"));// 血氧脉搏=2
+// System.out.print8ln("map.getData===" + map.get("xydata"));// 血压=3
+// System.out.print8ln("map.getData===" + map.get("twdata"));// 体温=4
+// System.out.print8ln("map.getData===" + map.get("xtdata"));// 血糖=5
+// System.out.print8ln("map.getData===" + map.get("nydata"));// 尿常规=6
+// System.out.print8ln("map.getData===" + map.get("bmidata"));// BMI=7
+// System.out.print8ln("map.getData===" + map.get("nsdata"));// 尿酸=8
+// System.out.print8ln("map.getData===" + map.get("dgcdata"));// 胆固醇=9
+// System.out.print8ln("map.getData===" + map.get("xhdbdata"));// 血红蛋白=10
 //xzdata 血脂 bfArray
 //kjdata 快检 kjArray
 //thxhdbdata 糖化血红蛋白 hba1cArray
@@ -257,7 +257,7 @@ type UploadJson struct {
 	Dgcdata []CholItem
 	Xhdbdata []HbItem
 	Xzdata []BfItem
-	Kjdata []JKItem
+	Kjdata []KJItem
 	Thxhdbdata []HbA1cItem
 }
 
