@@ -243,7 +243,7 @@ type HbItem struct {
 //胆固醇 CholItem type=9
 //血红蛋白 HbItem type=10
 //xzdata 血脂 BfItem type=11
-//kjdata 快检 JKItem type=12
+//kjdata 快检 KJItem type=12
 //thxhdbdata 糖化血红蛋白 HbA1cItem type=13
 
 type UploadJson struct {
@@ -261,6 +261,48 @@ type UploadJson struct {
 	Thxhdbdata []HbA1cItem
 }
 
+/*
+json={
+    "xymbdata": [
+        {
+            "MACHINE_ID": "100251",
+            "YHBM": "370811197402045542",
+            "YHMC": "李淑梅",
+            "ORG_NAME": "喻屯镇西王楼村卫生室",
+            "PID": "100251C1503565817980",
+            "SJZT": "1",
+            "XY": "98",
+            "JCRQ": "2017-08-24 17:10:17",
+            "YSBM": "370811197402265537",
+            "ORG_CODE": "37081103053",
+            "YSMC": "王德生",
+            "type": 2,
+            "MB": "70"
+        }
+    ],
+    "SERVICE_CODE": "bull.ResourcesHZ.SNY_yh_union_CRUD",
+    "xydata": [
+        {
+            "YHBM": "370811197402045542",
+            "YHMC": "李淑梅",
+            "ORG_NAME": "喻屯镇西王楼村卫生\n室",
+            "PID": "100251C1503565958793",
+            "YSMC": "王德生",
+            "type": 3,
+            "SZY": "71",
+            "MACHINE_ID": "100251",
+            "SSY": "104",
+            "RESULT": "成人模式",
+            "SJZT": "1",
+            "JCRQ": "2017-08-24 17:12:38",
+            "YSBM": "370811197402265537",
+            "ORG_CODE": "37081103053",
+            "PJY": "82"
+        }
+    ]
+}
+*/
+
 func UploadCheckups(s string, db *sql.DB) {
 	var uploadjson UploadJson
 	err := json.Unmarshal([]byte(s), &uploadjson)
@@ -269,4 +311,72 @@ func UploadCheckups(s string, db *sql.DB) {
 		return
 	}
 	fmt.Println(uploadjson)
+	if len(uploadjson.Xymbdata) != 0 {
+		upload_spo_data(uploadjson.Xymbdata, db)
+	}
+}
+
+//
+func upload_spo_data(data []SPOItem, db *sql.DB) {
+	fmt.Println("upload_spo_data")
+	fmt.Println(data)
+    tx,_ := db.Begin()
+    for _, v := range(data) {
+        //每次循环用的都是tx内部的连接，没有新建连接，效率高
+        tx.Exec(`INSERT INTO yhxy01(YHBM,YHMC,XY,MB,SJZT,JCRQ,SHLY,RESULT,PID,MACHINE_ID,ORG_CODE,ORG_NAME,YSBM,YSMC) 
+        	values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, v.YHBM, v.YHMC, v.XY, v.MB, v.SJZT, v.JCRQ, "0", "", v.PID, v.MACHINE_ID, 
+        	v.ORG_CODE, v.ORG_NAME, v.YSBM, v.YSMC)
+    }
+    //最后释放tx内部的连接
+    tx.Commit()
+}
+
+func upload_nibp_data(data []NIBPItem, db *sql.DB) {
+	fmt.Println("upload_nibp_data")
+	// fmt.Println(data)
+	// tx,_ := db.Begin()
+ //    for _, v := range(data) {
+ //        //每次循环用的都是tx内部的连接，没有新建连接，效率高
+ //        tx.Exec(`INSERT INTO yhxy01(YHBM,YHMC,XY,MB,SJZT,JCRQ,SHLY,RESULT,PID,MACHINE_ID,ORG_CODE,ORG_NAME,YSBM,YSMC) 
+ //        	values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, v.YHBM, v.YHMC, v.XY, v.MB, v.SJZT, v.JCRQ, "0", "", v.PID, v.MACHINE_ID, 
+ //        	v.ORG_CODE, v.ORG_NAME, v.YSBM, v.YSMC)
+ //    }
+ //    //最后释放tx内部的连接
+ //    tx.Commit()
+}
+
+func upload_tmperature_data(data []TemperatureItem, db *sql.DB) {
+
+}
+
+func upload_glu_data(data []GluItem, db *sql.DB) {
+
+}
+
+func upload_urine_data(data []UrineItem, db *sql.DB) {
+
+}
+
+func upload_bmi_data(data []BmiItem, db *sql.DB) {
+
+}
+
+func upload_chol_data(data []CholItem, db *sql.DB) {
+
+}
+
+func upload_hb_data(data []HbItem, db *sql.DB) {
+
+}
+
+func upload_bf_data(data []BfItem, db *sql.DB) {
+
+}
+
+func upload_kj_data(data []KJItem, db *sql.DB) {
+
+}
+
+func upload_hba1c_data(data []HbA1cItem, db *sql.DB) {
+
 }
