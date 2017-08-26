@@ -306,8 +306,8 @@ func UploadCheckups(s string, db *sql.DB) {
 	if len(uploadjson.Kjdata) != 0 {
 		upload_kj_data(uploadjson.Kjdata, db)//快检
 	}
-	if len(uploadjson.hxhdbdata) != 0 {
-		upload_hba1c_data(uploadjson.hxhdbdata, db)//糖化血红蛋白
+	if len(uploadjson.Thxhdbdata) != 0 {
+		upload_hba1c_data(uploadjson.Thxhdbdata, db)//糖化血红蛋白
 	}
 }
 
