@@ -1,1 +1,2 @@
-go build | go-duocanyi.exe
+go build -o app.exe
+app.exe

@@ -28,12 +28,12 @@ func Home(res http.ResponseWriter, req *http.Request) {
 	if m == "POST" {
 		fmt.Println(m)
 		fmt.Println(req.URL.Path)
-		body, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		fmt.Println(string(body))
+		// body, err := ioutil.ReadAll(req.Body)
+		// if err != nil {
+		// 	fmt.Println(err.Error())
+		// 	return
+		// }
+		//fmt.Println(string(body))
 	}
 	if m == "GET" {
 		fmt.Println(m)
@@ -98,6 +98,10 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.SNY_mpi_person_jkbg":// 上传健康报告
 	    	UploadReport(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件
+
+	    case "bull.ResourcesHZ.SNY_yhxd_new_CRUD":// 上传完了心电检测文件，上传的文件信息
+	    	
+	    case "bull.ResourcesHZ.SNY_yhfetalhm_CRUD":// 上传完了胎监文件，上传的文件信息
 
 	    default:
 
@@ -169,6 +173,69 @@ func ReadConfigFile() (*Config, error) {
 	return cfg, nil
 }
 
+func FileServlet(res http.ResponseWriter, req *http.Request) {
+	fmt.Println(req.Method)
+	fmt.Println(req.URL.Path)
+	fmt.Println(req.RemoteAddr)
+	fmt.Println(req.RequestURI)
+	req.ParseMultipartForm(32 << 20)
+	file, handler, err := req.FormFile("file")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Println(handler.Filename)
+	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+	io.Copy(f, file)
+	fmt.Fprintf(res, "upload ok")
+}
+
+func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		req.ParseMultipartForm(32 << 20)	//在使用r.MultipartForm前必须先调用ParseMultipartForm方法，参数为最大缓存
+		// fmt.Println(r.MultipartForm)
+		// fmt.Println(r.MultipartReader())
+		if req.MultipartForm != nil && req.MultipartForm.File != nil {
+			fhs := req.MultipartForm.File["file"]		//获取所有上传文件信息
+			num := len(fhs)
+
+			fmt.Printf("总文件数：%d 个文件", num)
+
+			//循环对每个文件进行处理
+			for _, fheader := range fhs {			
+				//获取文件名
+				filename := fheader.Filename
+
+				//结束文件
+				file,err := fheader.Open()
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				//保存文件
+				defer file.Close()
+				f, err := os.Create(filename)
+				defer f.Close()
+				io.Copy(f, file)
+
+				//获取文件状态信息
+				//fstat,_ := f.Stat()
+
+				//打印接收信息
+				//fmt.Fprintf(w, "%s  NO.: %d  Size: %d KB  Name：%s\n", time.Now().Format("2006-01-02 15:04:05"), n, fstat.Size()/1024, filename)
+				//fmt.Printf("%s  NO.: %d  Size: %d KB  Name：%s\n", time.Now().Format("2006-01-02 15:04:05"), n, fstat.Size()/1024, filename)
+
+			}
+		}
+	}
+}
+
 func main() {
 	var db_connector string
 	cfg, err := ReadConfigFile()
@@ -195,6 +262,7 @@ func main() {
 
 	http.HandleFunc("/", Home)
 	http.HandleFunc("/serviceProxy/servlet/", AllServlet)
+	http.HandleFunc("/medhcpfile/file/uploadFetalMonitoring.do", MultiFileServlet)
 	http.HandleFunc("/upload", Upload)
 	http.HandleFunc("/testret", TestRet)
 	fs := http.FileServer(http.Dir("."))
