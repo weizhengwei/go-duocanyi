@@ -11,7 +11,7 @@ type RetItem struct {
 
 type SysHead struct {
 	RET []RetItem
-	RES_STATUS string
+	RET_STATUS string
 }
 
 type Result struct {

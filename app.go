@@ -42,7 +42,7 @@ func Home(res http.ResponseWriter, req *http.Request) {
 }
 
 func AllServlet(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("servlet page")
+	fmt.Println("AllServlet")
 	m := req.Method
 	if m == "POST" {
 		fmt.Println(m)
@@ -52,7 +52,8 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 			fmt.Println(err.Error())
 			return
 		}
-		fmt.Println(string(body))
+		//fmt.Println(string(body))
+
 		// ss := strings.Replace(string(body), "%7B", "{", -1)
 		// ss = strings.Replace(ss, "%7D", "}", -1)
 		// ss = strings.Replace(ss, "%3A", ":", -1)
@@ -100,8 +101,10 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件
 
 	    case "bull.ResourcesHZ.SNY_yhxd_new_CRUD":// 上传完了心电检测文件，上传的文件信息
-	    	
+	    	UploadHeartChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_yhfetalhm_CRUD":// 上传完了胎监文件，上传的文件信息
+
+	    case "bull.ResourcesHZ.SNY_tb_equipment_status_CRUD":
 
 	    default:
 
@@ -139,7 +142,7 @@ func TestRet(res http.ResponseWriter, req *http.Request) {
 	retitem := RetItem{RET_CODE: "100100", SERVICE_CODE: "serviercode", RET_MSG: "ret msg"}
 	syshead := SysHead{}
 	syshead.RET = append(syshead.RET, retitem)
-	syshead.RES_STATUS = "status"
+	syshead.RET_STATUS = "status"
 	var ret Result
 	ret.SYS_HEAD = syshead
 	str, err := json.Marshal(&ret)
@@ -196,11 +199,28 @@ func FileServlet(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(res, "upload ok")
 }
 
+type FileInfo struct {
+	SYS_HEAD SysHead
+	BODY FileInfoItem
+}
+
+type FileInfoItem struct {
+	FileIds []string `json:"fileIds"`
+}
+
+//心电和胎监文件的上传，心电是两个文件，胎监是3个文件
 func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		req.ParseMultipartForm(32 << 20)	//在使用r.MultipartForm前必须先调用ParseMultipartForm方法，参数为最大缓存
 		// fmt.Println(r.MultipartForm)
 		// fmt.Println(r.MultipartReader())
+		var fileinfo FileInfo 
+		fii := FileInfoItem{}
+		retitem := RetItem{RET_CODE: "000000", SERVICE_CODE: "serviercode", RET_MSG: "ret msg"}
+		syshead := SysHead{}
+		syshead.RET = append(syshead.RET, retitem)
+		syshead.RET_STATUS = "S"
+		
 		if req.MultipartForm != nil && req.MultipartForm.File != nil {
 			fhs := req.MultipartForm.File["file"]		//获取所有上传文件信息
 			num := len(fhs)
@@ -208,7 +228,7 @@ func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
 			fmt.Printf("总文件数：%d 个文件", num)
 
 			//循环对每个文件进行处理
-			for _, fheader := range fhs {			
+			for _, fheader := range fhs {
 				//获取文件名
 				filename := fheader.Filename
 
@@ -223,7 +243,8 @@ func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
 				f, err := os.Create(filename)
 				defer f.Close()
 				io.Copy(f, file)
-
+				fii.FileIds = append(fii.FileIds, filename)
+				fmt.Println(filename)
 				//获取文件状态信息
 				//fstat,_ := f.Stat()
 
@@ -233,6 +254,15 @@ func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
 
 			}
 		}
+		fileinfo.BODY = fii
+		fileinfo.SYS_HEAD = syshead
+		ret, err := json.Marshal(fileinfo)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(string(ret))
+		res.Write(ret)
 	}
 }
 
