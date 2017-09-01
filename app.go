@@ -103,7 +103,7 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.SNY_yhxd_new_CRUD":// 上传完了心电检测文件，上传的文件信息
 	    	UploadHeartChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_yhfetalhm_CRUD":// 上传完了胎监文件，上传的文件信息
-
+	    	UploadFatalChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_tb_equipment_status_CRUD":
 
 	    default:

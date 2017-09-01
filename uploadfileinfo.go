@@ -28,6 +28,10 @@ type HeartChartInfoItem struct {
 }
 
 type FatalChartInfo struct {
+	Data FatalChartInfoItem
+}
+
+type FatalChartInfoItem struct {
 	PID string
 	Type int
 	YHBM string
@@ -43,6 +47,9 @@ type FatalChartInfo struct {
 	MonitorStartTime string
 	MonitorEndTime string
 	CheckGestationalAge string
+	Bullfile_id string
+	FmSoundPath string
+	Xml_bullfile_id string
 }
 
 func UploadHeartChartFileInfo(s string, db *sql.DB) {
@@ -73,6 +80,14 @@ func UploadHeartChartFileInfo(s string, db *sql.DB) {
 }
 
 func UploadFatalChartFileInfo(s string, db *sql.DB) {
-	fmt.Println("UploadHeartChartFileInfo")
+	fmt.Println("UploadFatalChartFileInfo")
+
+	var fci FatalChartInfo
+	err := json.Unmarshal([]byte(s), &fci)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(fci)
 }
 
