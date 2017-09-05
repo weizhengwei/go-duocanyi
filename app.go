@@ -52,7 +52,29 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 			fmt.Println(err.Error())
 			return
 		}
-		//fmt.Println(string(body))
+		urljson := req.URL.Query().Get("json")
+		if len(urljson) != 0 {
+			var uj RequestJson
+		    err := json.Unmarshal([]byte(urljson), &uj)
+		    if err != nil {
+		    	fmt.Println(err)
+		    	return
+		    }
+		    switch uj.SERVICE_CODE {
+		    	case "bull.ResourcesHZ.SyN_medical_UpImage":// 上传医生头像
+		    		UploadImageFile(res, req, "./Image/Doctor/")
+		    		UploadDoctorImage(urljson, db)
+		    	case "bull.ResourcesHZ.SYN_person_UpImage":// 上传居民头像
+		    		UploadImageFile(res, req, "./Image/Person/")
+		    		UploadPersonImage(urljson, db)
+		    	case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件
+
+		    	case "bull.ResourcesHZ.SYN_yhfetalhm_CRUD":// 上传胎监文件
+
+		    }
+		    return
+		}
+		// fmt.Println(string(body))
 
 		// ss := strings.Replace(string(body), "%7B", "{", -1)
 		// ss = strings.Replace(ss, "%7D", "}", -1)
@@ -86,26 +108,23 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 
 	    case "bull.ResourcesHZ.SYN_tb_medical_technicians_CRUD":// 上传医生信息
 
-	    case "bull.ResourcesHZ.SyN_medical_UpImage":// 上传医生头像
-
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_CRUD":// 上传居民信息
-
-	    case "bull.ResourcesHZ.SYN_person_UpImage":// 上传居民头像
-
+	    
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_archives_CRUD":// 上传健康档案
 
 	    case "bull.ResourcesHZ.SNY_yh_union_CRUD"://uploadCheckups
 	    	UploadCheckups(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_mpi_person_jkbg":// 上传健康报告
 	    	UploadReport(PostJsonBody, db)
-	    case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件
-
 	    case "bull.ResourcesHZ.SNY_yhxd_new_CRUD":// 上传完了心电检测文件，上传的文件信息
 	    	UploadHeartChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_yhfetalhm_CRUD":// 上传完了胎监文件，上传的文件信息
 	    	UploadFatalChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_tb_equipment_status_CRUD":
 
+	    case "bull.ResourcesHZ.SyN_medical_UpImage":// 上传医生头像
+	    case "bull.ResourcesHZ.SYN_person_UpImage":// 上传居民头像
+	    case "bull.ResourcesHZ.SYN_yhxd_CRUD":// 上传心电检测文件
 	    default:
 
 
