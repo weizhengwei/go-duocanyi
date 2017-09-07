@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
     _ "github.com/go-sql-driver/mysql"
     "encoding/json"
 )
@@ -29,7 +30,7 @@ type Json_Body struct {
 	BODY Json_Data `json:"BODY"`
 }
 
-func DealOrgName(s string, db *sql.DB) {
+func DealOrgName(res http.ResponseWriter, s string, db *sql.DB) {
 	var getorgcode GetOrgName
 	err := json.Unmarshal([]byte(s), &getorgcode)
 	if err != nil {
@@ -56,4 +57,62 @@ func DealOrgName(s string, db *sql.DB) {
 	json_body.BODY = json_data
 	ret, err := json.Marshal(&json_body)
 	fmt.Println(string(ret))
+	res.Write(ret)
 }
+
+
+
+/*
+private void getOrgName() {
+    JSONObject jsonObj = new JSONObject();
+    try {
+        jsonObj.put("SERVICE_CODE", "bull.CloudPlatInterface.Get_tb_admindivision_cascade_select");
+        jsonObj.put("ORG_CODE", orgIdEt.getText().toString());
+        jsonObj.put("pageNumber", 0);
+        jsonObj.put("pageSize", 10);
+        jsonObj.put("esblover", false);
+        jsonObj.put("CONSUMER_ID", "bbeeb31c1e7542a793203cc3bc376840");
+    } catch (JSONException e) {
+        Log.e("yao", e.toString());
+    }
+
+    RequestParams params = new RequestParams();
+    params.addBodyParameter("json", jsonObj.toString());
+    Log.e("yao", "获取设备名称 : " + jsonObj.toString());
+    HttpUtils http = new HttpUtils();
+    http.send(HttpMethod.POST, AppUtils.getUrl(), params, new BullRequestCallBack() {
+
+        @Override
+        public void onBullSuccess(JSONObject response) {
+            try {
+                JSONArray data = response.getJSONObject("BODY").getJSONArray("data");
+                final String name = data.size() > 0 ? data.getJSONObject(0).getString("ORG_NAME") : "";
+
+                Activity activity = getActivity();
+
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            orgNameEt.setText(name);
+                            orgNameEt.setSelection(orgNameEt.getText().length());
+                        }
+                    });
+                }
+            } catch (JSONException e) {
+                Log.e("yao", e.toString());
+            }
+        }
+
+        @Override
+        public void onBullFailure(JSONObject response) {
+
+        }
+
+        @Override
+        public void onFailure(HttpException httpexception, String s) {
+        }
+    });
+}
+*/

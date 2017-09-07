@@ -99,11 +99,11 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    switch jq.SERVICE_CODE {
 	    case "bull.CloudPlatInterface.Get_tb_admindivision_cascade_select"://根据机构ID获取机构名称
 	    	fmt.Println(jq.SERVICE_CODE)
-	    	DealOrgName(PostJsonBody, db)
+	    	DealOrgName(res, PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_tb_equipment_CRUD"://注册多参仪
 	    	DealRegister(PostJsonBody, db)
 	    case "bull.ResourcesHZ.Down_tb_medical_technicians"://下拉医生信息
-
+	    	DownloadDoctor(PostJsonBody, db)
 	    case "bull.ResourcesHZ.Down_mpi_personbasics"://下拉居民信息
 
 	    case "bull.ResourcesHZ.SYN_tb_medical_technicians_CRUD":// 上传医生信息
