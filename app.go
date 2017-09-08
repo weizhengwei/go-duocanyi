@@ -107,9 +107,9 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.Down_mpi_personbasics"://下拉居民信息
 
 	    case "bull.ResourcesHZ.SYN_tb_medical_technicians_CRUD":// 上传医生信息
-
+	    	UploadDoctor(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_CRUD":// 上传居民信息
-	    
+	    	UploadPerson(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_archives_CRUD":// 上传健康档案
 
 	    case "bull.ResourcesHZ.SNY_yh_union_CRUD"://uploadCheckups
