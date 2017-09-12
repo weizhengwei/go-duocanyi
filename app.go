@@ -17,6 +17,7 @@ import (
 
 const BIND_ADDR = ":9090"
 var db *sql.DB
+var logger *log.Logger
 
 type RequestJson struct {
 	SERVICE_CODE string
@@ -42,11 +43,10 @@ func Home(res http.ResponseWriter, req *http.Request) {
 }
 
 func AllServlet(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("AllServlet")
+	logger.Println("AllServlet")
 	m := req.Method
 	if m == "POST" {
-		fmt.Println(m)
-		fmt.Println(req.URL.Path)
+		logger.Println(req.URL.Path)
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -87,7 +87,7 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    	fmt.Println(err)
 	        return
 	    }
-	    fmt.Println(PostJsonBody)
+	    logger.Println(PostJsonBody)
 	    PostJsonBody = PostJsonBody[5:]
 	    var jq RequestJson
 	    err = json.Unmarshal([]byte(PostJsonBody), &jq)
@@ -107,7 +107,7 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.Down_mpi_personbasics"://下拉居民信息
 
 	    case "bull.ResourcesHZ.SYN_tb_medical_technicians_CRUD":// 上传医生信息
-	    	UploadDoctor(PostJsonBody, db)
+	    	UploadDoctor(PostJsonBody, db, logger)
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_CRUD":// 上传居民信息
 	    	UploadPerson(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SYN_mpi_personbasics_archives_CRUD":// 上传健康档案
@@ -121,6 +121,9 @@ func AllServlet(res http.ResponseWriter, req *http.Request) {
 	    case "bull.ResourcesHZ.SNY_yhfetalhm_CRUD":// 上传完了胎监文件，上传的文件信息
 	    	UploadFatalChartFileInfo(PostJsonBody, db)
 	    case "bull.ResourcesHZ.SNY_tb_equipment_status_CRUD":
+	    	fmt.Println("上传设备状态")
+	    case "bull.ResourcesHZ.SYN_tb_equipment_location":
+	    	fmt.Println("上传gps位置")
 
 	    case "bull.ResourcesHZ.SyN_medical_UpImage":// 上传医生头像
 	    case "bull.ResourcesHZ.SYN_person_UpImage":// 上传居民头像
@@ -286,6 +289,8 @@ func MultiFileServlet(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	initlogger()
+
 	var db_connector string
 	cfg, err := ReadConfigFile()
 	if err != nil {
@@ -297,7 +302,7 @@ func main() {
 		db_connector += "/" + cfg.DB_NAME + "?charset=utf8"
 	}
 	fmt.Println(db_connector)
-
+	logger.Println(db_connector)
 	//db, _ := sql.Open("mysql", "root:r00t@tcp(localhost:3306)/med_gwc?charset=utf8")
 	db, _ = sql.Open("mysql", db_connector)
 	
@@ -316,8 +321,26 @@ func main() {
 	http.HandleFunc("/testret", TestRet)
 	fs := http.FileServer(http.Dir("."))
 	http.Handle("/test", http.StripPrefix("/test/", fs))
-	fmt.Println("server listen at", BIND_ADDR)
+	logger.Println("server listen at", BIND_ADDR)
 	log.Fatal(http.ListenAndServe(BIND_ADDR, nil))
+}
+
+func initlogger(){
+    logfile, err := os.OpenFile("app.log", os.O_APPEND|os.O_RDWR|os.O_CREATE, 0777)
+    if err != nil {
+        fmt.Printf("%s\r\n", err.Error())
+        os.Exit(-1)
+    }
+    //defer logfile.Close()
+    writers := []io.Writer{
+        logfile,
+        os.Stdout,
+    }
+    fileAndStdoutWriter := io.MultiWriter(writers...)
+    //logger := log.New(fileAndStdoutWriter, "\r\n", log.Ldate|log.Ltime|log.Llongfile)
+    logger = log.New(fileAndStdoutWriter, "", log.Ldate|log.Ltime|log.Lshortfile)//Llongfile
+    //logger.Println("hello")
+    // logger.Fatal("test")
 }
 
 

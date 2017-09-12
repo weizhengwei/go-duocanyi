@@ -7,6 +7,7 @@ import (
     "encoding/json"
     "github.com/satori/go.uuid"
     "time"
+    "log"
 )
 
 //医生数据
@@ -32,8 +33,8 @@ type JsonDoctorItem struct {
 	SCDATE string
 }
 
-func UploadDoctor(s string, db *sql.DB) {
-	fmt.Println("UploadDoctor")
+func UploadDoctor(s string, db *sql.DB, logger *log.Logger) {
+	logger.Println("UploadDoctor")
 	var jd JsonDoctor
 	err := json.Unmarshal([]byte(s), &jd)
 	if err != nil {
@@ -43,22 +44,36 @@ func UploadDoctor(s string, db *sql.DB) {
 	fmt.Println(jd)
 	
 	tx,_ := db.Begin()
+	time := gettime()
+    // for _, v := range(jd.Data) {
+    //     _, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
+    //     	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
+    //     	ORG_CODE,FLAG,PASSWORD,SCDATE,RECORDWAY,DOCTOR_EMPI) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    //     	time, time, "1", v.CREDENTIAL_CODE, v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY, getuuid())
+    //     if err != nil {
+    //     	fmt.Println(err)
+    //     	break
+    //     }
+    // }
     for _, v := range(jd.Data) {
-        _, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
-        	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
-        	ORG_CODE,FLAG,PASSWORD,SCDATE,RECORDWAY,DOCTOR_EMPI) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        	gettime(), gettime(), "1", v.CREDENTIAL_CODE, v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY, getuuid())
-        if err != nil {
-        	fmt.Println(err)
-        	break
-        }
+    _, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
+    	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
+    	ORG_CODE,FLAG,PASSWORD,SCDATE,RECORDWAY,DOCTOR_EMPI) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+    	ON DUPLICATE KEY update UPDATETIME$=?,CURRENTSTATE=?,NAME=?,SEX=?,BIRTHDAY=?,MOBILE=?,AGENCY_NAME=?,MACHINE_ID=?,
+    	PID=?,CENSUS_REGISTER_ADDRESS=?,ORG_CODE=?,FLAG=?,PASSWORD=?,SCDATE=?,RECORDWAY=?`,
+    	time, time, "1", v.CREDENTIAL_CODE, v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY, getuuid(), 
+    	time, "1",v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY)
+    if err != nil {
+		    fmt.Println(err)
+	    	break
+    	}
     }
     tx.Commit()
 }
 
 func getuuid() string {
 	u1 := uuid.NewV4()
-	fmt.Printf("UUIDv4: %s\n", u1)
+	//fmt.Printf("UUIDv4: %s\n", u1)
 	s := u1.String()
 	ss := s[0:8] + s[9:13] + s[14:18] + s[19:23]+s[24:]
 	return ss
