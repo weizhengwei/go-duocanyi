@@ -45,6 +45,7 @@ func UploadDoctor(s string, db *sql.DB, logger *log.Logger) {
 	
 	tx,_ := db.Begin()
 	time := gettime()
+	uuid := getuuid()
     // for _, v := range(jd.Data) {
     //     _, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
     //     	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
@@ -56,14 +57,25 @@ func UploadDoctor(s string, db *sql.DB, logger *log.Logger) {
     //     }
     // }
     for _, v := range(jd.Data) {
-    _, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
-    	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
-    	ORG_CODE,FLAG,PASSWORD,SCDATE,RECORDWAY,DOCTOR_EMPI) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
-    	ON DUPLICATE KEY update UPDATETIME$=?,CURRENTSTATE=?,NAME=?,SEX=?,BIRTHDAY=?,MOBILE=?,AGENCY_NAME=?,MACHINE_ID=?,
-    	PID=?,CENSUS_REGISTER_ADDRESS=?,ORG_CODE=?,FLAG=?,PASSWORD=?,SCDATE=?,RECORDWAY=?`,
-    	time, time, "1", v.CREDENTIAL_CODE, v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY, getuuid(), 
-    	time, "1",v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY)
-    if err != nil {
+    	_, err := tx.Exec(`INSERT INTO tb_medical_technicians(CREATETIME$,UPDATETIME$,CURRENTSTATE,
+	    	CREDENTIAL_CODE,NAME,SEX,BIRTHDAY,MOBILE,AGENCY_NAME,MACHINE_ID,PID,CENSUS_REGISTER_ADDRESS,
+	    	ORG_CODE,FLAG,PASSWORD,SCDATE,RECORDWAY,DOCTOR_EMPI) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+	    	ON DUPLICATE KEY update UPDATETIME$=?,CURRENTSTATE=?,NAME=?,SEX=?,BIRTHDAY=?,MOBILE=?,AGENCY_NAME=?,MACHINE_ID=?,
+	    	PID=?,CENSUS_REGISTER_ADDRESS=?,ORG_CODE=?,FLAG=?,PASSWORD=?,SCDATE=?,RECORDWAY=?`,
+	    	time, time, "1", v.CREDENTIAL_CODE, v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY, uuid, 
+	    	time, "1",v.NAME, v.SEX, v.BIRTHDAY, v.MOBILE, v.AGENCY_NAME, v.MACHINE_ID, v.PID, v.CENSUS_REGISTER_ADDRESS, v.ORG_CODE, v.FLAG, v.PASSWORD, v.SCDATE, v.RECORDWAY)
+	    if err != nil {
+		    fmt.Println(err)
+	    	break
+    	}
+    	ISPERMISSIONUSER := "1"
+    	_, err = tx.Exec(`INSERT INTO cbf_user(USERNAME,PASSWORD,STATUS,DESCS,ISPERMISSIONUSER,CREATETIME,
+    		UPDATEDTIME,email,phone,operate_code,identity_cards,type,EMPI,FILE_ID,FILE_NAME)
+    		values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY update USERNAME=?,STATUS=?,DESCS=?,UPDATEDTIME=?,
+    		email=?,phone=?,operate_code=?,identity_cards=?`, 
+    		v.CREDENTIAL_CODE, v.PASSWORD, "1", v.NAME, ISPERMISSIONUSER,time, time, v.EMAIL, v.MOBILE, "", v.CREDENTIAL_CODE, "1", uuid, "", "", 
+    		v.CREDENTIAL_CODE, "1", v.NAME, time, v.EMAIL, v.MOBILE, "", v.CREDENTIAL_CODE)
+    	if err != nil {
 		    fmt.Println(err)
 	    	break
     	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
     _ "github.com/go-sql-driver/mysql"
     "encoding/json"
+    "log"
 )
 
 //医生数据
@@ -35,15 +36,34 @@ type JsonPersonItem struct {
 	ORG_NAME string
 }
 
-func UploadPerson(s string, db *sql.DB) {
-	fmt.Println("UploadPerson")
+func UploadPerson(s string, db *sql.DB, logger *log.Logger) {
+	logger.Println("UploadPerson")
 	var jp JsonPerson
 	err := json.Unmarshal([]byte(s), &jp)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(jp)
+	logger.Println(jp)
+	tx,_ := db.Begin()
+	time := gettime()
+	uuid := getuuid()
+    for _, v := range(jp.Data) {
+    	_, err := tx.Exec(`INSERT INTO mpi_personbasics(GLOBAL_ID,NAME,GENDER,BIRTHDAY,AGE,NATION,ADDRESS,IDENTITY_CARDS,
+    		TELEPHONE_NUMBER,CREATED_TIME,CHANGED_TIME,state,ORG_CODE,PID,MACHINE_ID,RECORDWAY,ORG_NAME,CJYSBM,CATEGORY,EMPI,
+    		IS_VERIFICATION,putOnRecord) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+	    	ON DUPLICATE KEY update NAME=?,GENDER=?,BIRTHDAY=?,AGE=?,NATION=?,ADDRESS=?,TELEPHONE_NUMBER=?,
+	    	CHANGED_TIME=?,state=?,ORG_CODE=?,MACHINE_ID=?,RECORDWAY=?,ORG_NAME=?,CJYSBM=?,CATEGORY=?`,
+	    	v.GLOBAL_ID, v.NAME, v.GENDER, v.BIRTHDAY, "", v.NATION, v.ADDRESS, v.IDENTITY_CARDS, v.TELEPHONE_NUMBER, time, 
+	    	time, "1", v.ORG_CODE, v.PID, v.MACHINE_ID, v.RECORDWAY, v.ORG_NAME, v.CJYSBM, "1", uuid, "1", "0", 
+	    	v.NAME, v.GENDER, v.BIRTHDAY, "", v.NATION, v.ADDRESS, v.TELEPHONE_NUMBER, time, "1", v.ORG_CODE, v.MACHINE_ID, 
+	    	v.RECORDWAY, v.ORG_NAME, v.CJYSBM, "1")
+	    if err != nil {
+		    fmt.Println(err)
+	    	break
+    	}
+    }
+    tx.Commit()
 }
 
 /*
@@ -107,5 +127,33 @@ public static JSONObject toPersonJson(PersonBean person, DeviceBean device) thro
 	params.put("ORG_CODE", device.getOrgId());
 	params.put("ORG_NAME", device.getOrgName());
 	return params;
+}
+
+json={
+    "data": [
+        {
+            "BIRTHDAY": "1960-11-11",
+            "NAME": "居民",
+            "ORG_NAME": "Frankfurt",
+            "PID": "110101196011116995",
+            "ADDRESS": "地址",
+            "XGYSBM": "",
+            "RECORDWAY": "1",
+            "MACHINE_ID": "100003",
+            "IDENTITY_CARDS": "110101196011116995",
+            "CJYSBM": "130523198608251631",
+            "HCARDNO": "card0009",
+            "GENDER": "1",
+            "YSBM": "",
+            "EMAIL": "邮箱",
+            "NATION": "彝\n",
+            "ORG_CODE": "10086",
+            "FLAG": "1",
+            "SCDATE": "2017-09-13 16:58:41",
+            "GLOBAL_ID": "110101196011116995",
+            "TELEPHONE_NUMBER": "18800000000"
+        }
+    ],
+    "SERVICE_CODE": "bull.ResourcesHZ.SYN_mpi_personbasics_CRUD"
 }
 */
